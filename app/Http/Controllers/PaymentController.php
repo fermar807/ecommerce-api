@@ -23,6 +23,15 @@ class PaymentController extends Controller
                 'payment_method' => 'required|string|max:50',
             ]);
 
+            // Verificar si la orden ya tiene un pago 
+            $existingPayment = Payment::where('order_id', $order->id)->first(); 
+            
+            if ($existingPayment) { 
+                return response()->json(
+                     [ 'message' => 'La orden ya tiene un pago registrado', 
+                     'data' => $existingPayment ], 
+                     409 ); }
+
             // Crear el pago
             $payment = Payment::create([
                 'order_id' => $order->id,
