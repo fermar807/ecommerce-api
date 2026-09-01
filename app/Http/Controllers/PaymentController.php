@@ -5,9 +5,62 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
 class PaymentController extends Controller
 {
+    #[OA\Post(
+    path: '/api/orders/{orderId}/payment',
+    summary: 'Procesar pago de una orden',
+    description: 'Registra el pago de una orden de compra.',
+    security: [['sanctum' => []]],
+    tags: ['Payments'],
+    parameters: [
+        new OA\Parameter(
+            name: 'orderId',
+            description: 'ID de la orden a pagar',
+            in: 'path',
+            required: true,
+            schema: new OA\Schema(type: 'integer'),
+            example: 1
+        )
+    ],
+    requestBody: new OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            required: ['payment_method'],
+            properties: [
+                new OA\Property(
+                    property: 'payment_method',
+                    type: 'string',
+                    example: 'card'
+                )
+            ]
+        )
+    ),
+    responses: [
+        new OA\Response(
+            response: 201,
+            description: 'Pago procesado correctamente'
+        ),
+        new OA\Response(
+            response: 401,
+            description: 'No autenticado'
+        ),
+        new OA\Response(
+            response: 404,
+            description: 'Orden no encontrada'
+        ),
+        new OA\Response(
+            response: 409,
+            description: 'La orden ya tiene un pago registrado'
+        ),
+        new OA\Response(
+            response: 422,
+            description: 'Datos de validacion incorrectos'
+        )
+    ]
+)]
     /**
      * Crear un pago para una orden.
      */

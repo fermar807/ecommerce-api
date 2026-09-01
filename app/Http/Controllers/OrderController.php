@@ -7,9 +7,28 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StoreOrderRequest;
+use OpenApi\Attributes as OA;
 
 class OrderController extends Controller
 {
+    #[OA\Get(
+    path: '/api/orders',
+    summary: 'Historial de compras',
+    description: 'Obtiene las ordenes de compra del usuario autenticado.',
+    security: [['sanctum' => []]],
+    tags: ['Orders'],
+    responses: [
+        new OA\Response(
+            response: 200,
+            description: 'Lista de ordenes'
+        ),
+        new OA\Response(
+            response: 401,
+            description: 'No autenticado'
+        )
+    ]
+)]
+
     /**
      * Obtener las órdenes del usuario autenticado.
      */
@@ -40,6 +59,57 @@ class OrderController extends Controller
             );
         }
     }
+    #[OA\Post(
+    path: '/api/orders',
+    summary: 'Crear una orden',
+    description: 'Crea una orden de compra para el usuario autenticado.',
+    security: [['sanctum' => []]],
+    tags: ['Orders'],
+    requestBody: new OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            required: ['items'],
+            properties: [
+                new OA\Property(
+                    property: 'items',
+                    type: 'array',
+                    description: 'Productos incluidos en la orden',
+                    items: new OA\Items(
+                        type: 'object',
+                        required: ['product_id', 'quantity'],
+                        properties: [
+                            new OA\Property(
+                                property: 'product_id',
+                                type: 'integer',
+                                example: 1
+                            ),
+                            new OA\Property(
+                                property: 'quantity',
+                                type: 'integer',
+                                example: 2
+                            )
+                        ]
+                    )
+                )
+            ]
+        )
+    ),
+    responses: [
+        new OA\Response(
+            response: 201,
+            description: 'Orden creada correctamente'
+        ),
+        new OA\Response(
+            response: 401,
+            description: 'No autenticado'
+        ),
+        new OA\Response(
+            response: 422,
+            description: 'Datos de validacion incorrectos'
+        )
+    ]
+)]
+
 
     /**
      * Crear una nueva orden.
@@ -119,6 +189,39 @@ class OrderController extends Controller
             );
         }
     }
+
+    #[OA\Get(
+    path: '/api/orders/{id}',
+    summary: 'Consultar una orden',
+    description: 'Obtiene el detalle de una orden del usuario autenticado.',
+    security: [['sanctum' => []]],
+    tags: ['Orders'],
+    parameters: [
+        new OA\Parameter(
+            name: 'id',
+            description: 'ID de la orden',
+            in: 'path',
+            required: true,
+            schema: new OA\Schema(type: 'integer'),
+            example: 1
+        )
+    ],
+    responses: [
+        new OA\Response(
+            response: 200,
+            description: 'Orden encontrada'
+        ),
+        new OA\Response(
+            response: 401,
+            description: 'No autenticado'
+        ),
+        new OA\Response(
+            response: 404,
+            description: 'Orden no encontrada'
+        )
+    ]
+)]
+
 
     
     public function show(Request $request, String $id)

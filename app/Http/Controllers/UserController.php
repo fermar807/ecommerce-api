@@ -5,9 +5,59 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use OpenApi\Attributes as OA;
 
 class UserController extends Controller
 {
+
+#[OA\Post(
+    path: '/api/register',
+    summary: 'Registrar usuario',
+    description: 'Registra un nuevo usuario y genera un token de autenticacion.',
+    tags: ['Authentication'],
+    requestBody: new OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            required: ['name', 'email', 'password'],
+            properties: [
+                new OA\Property(
+                    property: 'name',
+                    type: 'string',
+                    example: 'Fernando Gonzalez'
+                ),
+                new OA\Property(
+                    property: 'email',
+                    type: 'string',
+                    format: 'email',
+                    example: 'fernando@example.com'
+                ),
+                new OA\Property(
+                    property: 'password',
+                    type: 'string',
+                    format: 'password',
+                    example: 'Password123'
+                ),
+                new OA\Property(
+                    property: 'password_confirmation',
+                    type: 'string',
+                    format: 'password',
+                    example: 'Password123'
+                )
+            ]
+        )
+    ),
+    responses: [
+        new OA\Response(
+            response: 201,
+            description: 'Usuario registrado correctamente'
+        ),
+        new OA\Response(
+            response: 422,
+            description: 'Datos de validacion incorrectos'
+        )
+    ]
+)]
+
     /**
      * Register a new user.
      */
@@ -48,6 +98,47 @@ class UserController extends Controller
             );
         }
     }
+    #[OA\Post(
+    path: '/api/login',
+    summary: 'Iniciar sesion',
+    description: 'Autentica un usuario y genera un token de Sanctum.',
+    tags: ['Authentication'],
+    requestBody: new OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            required: ['email', 'password'],
+            properties: [
+                new OA\Property(
+                    property: 'email',
+                    type: 'string',
+                    format: 'email',
+                    example: 'fernando@example.com'
+                ),
+                new OA\Property(
+                    property: 'password',
+                    type: 'string',
+                    format: 'password',
+                    example: 'Password123'
+                )
+            ]
+        )
+    ),
+    responses: [
+        new OA\Response(
+            response: 200,
+            description: 'Login exitoso'
+        ),
+        new OA\Response(
+            response: 401,
+            description: 'Credenciales incorrectas'
+        ),
+        new OA\Response(
+            response: 422,
+            description: 'Datos de validacion incorrectos'
+        )
+    ]
+)]
+
 
     /**
      * Login user.
